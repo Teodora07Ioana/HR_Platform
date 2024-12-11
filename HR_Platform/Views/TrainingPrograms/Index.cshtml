@@ -1,21 +1,5 @@
-﻿@* @model IEnumerable<HR_Platform.Models.TrainingProgram>
-
-@{
-    ViewData["Title"] = "Index";
-}
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-
-<form asp-action="Index" method="get">
-    <p>
-        Find by name or description: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
-        <input type="submit" value="Search" class="btn btn-default" />
-    </p>
-</form>
+﻿<h2>Training Programs</h2>
+<div id="notificationContainer"></div>
 
 <table class="table">
     <thead>
@@ -23,55 +7,10 @@
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">Program Name</a>
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
+            <th>Description</th>
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["StartDateSortParm"]">Start Date</a>
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProgramName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TrainingProgramID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TrainingProgramID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TrainingProgramID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
- *@
-
-@model IEnumerable<HR_Platform.Models.TrainingProgram>
-
-<h2>Training Programs</h2>
-<div id="notificationContainer"></div>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Program Name</th>
-            <th>Description</th>
-            <th>Start Date</th>
             <th>End Date</th>
             <th>Actions</th>
         </tr>
@@ -90,39 +29,8 @@
                         <input type="hidden" name="trainingProgramId" value="@program.TrainingProgramID" />
                         <button type="submit" class="btn btn-primary">Enroll</button>
                     </form>
-
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
-<style>
-    .notification-container {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 300px;
-        z-index: 1000;
-    }
-    .alert {
-        margin-bottom: 10px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-    }
-</style>

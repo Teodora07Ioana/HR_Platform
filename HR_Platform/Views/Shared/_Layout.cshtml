@@ -40,7 +40,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Attendances" asp-action="Manage">Gestionează Prezența</a>
                             </li>
-                           
+                           <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="EmployeeTrainings" asp-action="Index">Traininguri Angajați</a>
+                         </li>
                          
                         }
                         else if (User.IsInRole("Admin"))
@@ -51,9 +53,7 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Gestionează Departamente</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="TrainingPrograms" asp-action="Index">Gestionează Traininguri</a>
-                            </li>
+                           
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Claims" asp-action="UserRoles">Roluri</a>
                             </li>

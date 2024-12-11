@@ -22,33 +22,52 @@ namespace HR_API.Controllers
 
         // GET: api/Attendances
         [HttpGet]
-        [HttpGet("user/{email}")]
-        public async Task<ActionResult<IEnumerable<Attendance>>> GetUserAttendances(string email)
-        {
-            var attendances = await _context.Attendances
-                .Include(a => a.Employee)
-                .Where(a => a.Employee.Email == email)
-                .ToListAsync();
-
-            return attendances;
-        }
-
-
-        // GET: api/Attendances/5
-       
-        [HttpGet]
         public async Task<ActionResult<IEnumerable<Attendance>>> GetAttendances()
         {
             if (_context.Attendances == null)
             {
                 return NotFound();
             }
-
-            return await _context.Attendances
-                .Include(a => a.Employee) // Include angajatul asociat pontajului
-                .ToListAsync();
+            return await _context.Attendances.Include(a => a.Employee).ToListAsync();
         }
 
+        // GET: api/Attendances/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Attendance>> GetAttendance(int id)
+        {
+            if (_context.Attendances == null)
+            {
+                return NotFound();
+            }
+            var attendance = await _context.Attendances.Include(a => a.Employee).FirstOrDefaultAsync(a => a.AttendanceID == id);
+
+            if (attendance == null)
+            {
+                return NotFound();
+            }
+
+            return attendance;
+        }
+        [HttpGet("user/{email}")]
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetUserAttendances(string email)
+        {
+            if (_context.Attendances == null)
+            {
+                return NotFound();
+            }
+
+            var attendances = await _context.Attendances
+                .Include(a => a.Employee)
+                .Where(a => a.Employee.Email == email) // Filtrare după email
+                .ToListAsync();
+
+            if (!attendances.Any())
+            {
+                return NotFound("Nu există cereri pentru acest utilizator.");
+            }
+
+            return attendances;
+        }
 
         // POST: api/Attendances
         [HttpPost]

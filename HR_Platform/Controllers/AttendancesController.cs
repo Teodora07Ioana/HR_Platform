@@ -83,29 +83,44 @@ namespace HR_Platform.Controllers
         // GET: Attendances
         public async Task<IActionResult> Index()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-
-            // Dacă utilizatorul este manager, returnează toate pontajele
-            if (User.IsInRole("Manager"))
+            try
             {
-                var response = await _httpClient.GetAsync(_baseUrl);
-                response.EnsureSuccessStatusCode();
+                // Verifică rolul utilizatorului
+                if (User.IsInRole("Manager"))
+                {
+                    // Managerul vede toate cererile
+                    var response = await _httpClient.GetAsync(_baseUrl);
+                    response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsStringAsync();
-                var attendances = JsonConvert.DeserializeObject<List<Attendance>>(json);
+                    var json = await response.Content.ReadAsStringAsync();
+                    var attendances = JsonConvert.DeserializeObject<List<Attendance>>(json);
 
-                return View(attendances);
+                    return View(attendances);
+                }
+                else
+                {
+                    // Utilizatorul obișnuit vede doar cererile sale
+                    var email = User.FindFirstValue(ClaimTypes.Email);
+                    if (string.IsNullOrEmpty(email))
+                    {
+                        ModelState.AddModelError("", "Nu s-a găsit email-ul utilizatorului autentificat.");
+                        return View(new List<Attendance>());
+                    }
+
+                    // Obține cererile utilizatorului curent
+                    var response = await _httpClient.GetAsync($"{_baseUrl}/user/{email}");
+                    response.EnsureSuccessStatusCode();
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    var attendances = JsonConvert.DeserializeObject<List<Attendance>>(json);
+
+                    return View(attendances);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Returnează doar pontajele utilizatorului curent
-                var response = await _httpClient.GetAsync($"{_baseUrl}/user/{email}");
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsStringAsync();
-                var attendances = JsonConvert.DeserializeObject<List<Attendance>>(json);
-
-                return View(attendances);
+                ModelState.AddModelError("", $"A apărut o eroare: {ex.Message}");
+                return View(new List<Attendance>());
             }
         }
 
@@ -188,28 +203,26 @@ namespace HR_Platform.Controllers
                 return NotFound();
             }
 
-            var email = User.FindFirstValue(ClaimTypes.Email);
-
-            // Obține pontajul
-            var response = await _httpClient.GetAsync($"{_baseUrl}/{id}");
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                return NotFound();
+                var response = await _httpClient.GetAsync($"{_baseUrl}/{id}");
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return NotFound();
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var attendance = JsonConvert.DeserializeObject<Attendance>(json);
+
+                await PopulateEmployeesDropdown(attendance.EmployeeID);
+                return View(attendance);
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var attendance = JsonConvert.DeserializeObject<Attendance>(json);
-
-            // Permite editarea doar dacă utilizatorul curent este manager sau este proprietarul pontajului
-            if (!User.IsInRole("Manager") && attendance.Employee.Email != email)
+            catch (Exception ex)
             {
-                return Forbid(); // Acces interzis
+                ModelState.AddModelError("", $"An error occurred: {ex.Message}");
+                return RedirectToAction(nameof(Index));
             }
-
-            await PopulateEmployeesDropdown(attendance.EmployeeID);
-            return View(attendance);
         }
-
 
         // POST: Attendances/Edit/5
         [HttpPost]

@@ -12,18 +12,11 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @if (User.IsInRole("Manager"))
-            {
-                <div class="form-group">
-                    <label asp-for="EmployeeID" class="control-label"></label>
-                    <select asp-for="EmployeeID" class="form-control" asp-items="ViewBag.EmployeeID"></select>
-                    <span asp-validation-for="EmployeeID" class="text-danger"></span>
-                </div>
-            }
-            else
-            {
-                <input type="hidden" asp-for="EmployeeID" value="@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
-            }
+            <div class="form-group">
+                <label asp-for="EmployeeID" class="control-label"></label>
+                <select asp-for="EmployeeID" class="form-control" asp-items="ViewBag.EmployeeID"></select>
+                <span asp-validation-for="EmployeeID" class="text-danger"></span>
+            </div>
 
             <div class="form-group">
                 <label asp-for="Date" class="control-label"></label>
@@ -57,7 +50,5 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

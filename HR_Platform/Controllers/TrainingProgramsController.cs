@@ -36,20 +36,29 @@ namespace HR_Platform.Controllers
 
             try
             {
-                Console.WriteLine("Fetching training programs...");
-                // Build API request URL with query parameters
-                var requestUrl = _baseUrl;
-
-                if (!string.IsNullOrEmpty(searchString) || !string.IsNullOrEmpty(sortOrder))
-                {
-                    requestUrl += $"?searchString={searchString}&sortOrder={sortOrder}";
-                }
-
-                var response = await _httpClient.GetAsync(requestUrl);
+                var response = await _httpClient.GetAsync(_baseUrl);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
                 var trainingPrograms = JsonConvert.DeserializeObject<List<TrainingProgram>>(json);
+
+                // Aplică căutarea
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    trainingPrograms = trainingPrograms
+                        .Where(tp => tp.ProgramName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                                     tp.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                // Aplică sortarea
+                trainingPrograms = sortOrder switch
+                {
+                    "name_desc" => trainingPrograms.OrderByDescending(tp => tp.ProgramName).ToList(),
+                    "start_date" => trainingPrograms.OrderBy(tp => tp.StartDate).ToList(),
+                    "start_date_desc" => trainingPrograms.OrderByDescending(tp => tp.StartDate).ToList(),
+                    _ => trainingPrograms.OrderBy(tp => tp.ProgramName).ToList(),
+                };
 
                 return View(trainingPrograms);
             }
@@ -226,52 +235,6 @@ namespace HR_Platform.Controllers
                 return RedirectToAction("Delete", new { id });
             }
         }
-        /*[HttpPost]
-        public async Task<IActionResult> Enroll(int trainingId)
-        {
-            var userEmail = User.Identity?.Name;
-
-            // Obține angajatul curent
-            var response = await _httpClient.GetAsync(_employeeApiUrl);
-            if (!response.IsSuccessStatusCode)
-            {
-                ModelState.AddModelError("", "Nu s-a putut obține lista angajaților.");
-                return RedirectToAction("Index");
-            }
-
-            var employeesJson = await response.Content.ReadAsStringAsync();
-            var employees = JsonConvert.DeserializeObject<List<Employee>>(employeesJson);
-            var currentEmployee = employees.FirstOrDefault(e => e.Email == userEmail);
-
-            if (currentEmployee == null)
-            {
-                ModelState.AddModelError("", "Angajatul nu a fost găsit.");
-                return RedirectToAction("Index");
-            }
-
-            // Creează asocierea între angajat și training
-            var enrollment = new EmployeeTraining
-            {
-                EmployeeID = currentEmployee.EmployeeID,
-                TrainingProgramID = trainingId
-            };
-
-            var json = JsonConvert.SerializeObject(enrollment);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var enrollResponse = await _httpClient.PostAsync($"{_baseUrl}/Enroll", content);
-            if (enrollResponse.IsSuccessStatusCode)
-            {
-                // Trimite notificare prin SignalR
-                await _hubContext.Clients.User(userEmail).SendAsync("ReceiveNotification", "Te-ai înscris cu succes la curs!");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Înscrierea nu a reușit.");
-            }
-
-            return RedirectToAction("Index");
-        }*/
-
+      
     }
 }
