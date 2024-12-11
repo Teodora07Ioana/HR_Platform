@@ -1,0 +1,43 @@
+﻿@model IEnumerable<HR_Platform.Controllers.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "User Roles";
+}
+
+<h1>User Roles</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userRole in Model)
+        {
+            <tr>
+                <td>@userRole.Email</td>
+                <td>
+                    @if (userRole.Roles.Any())
+                    {
+                        <ul>
+                            @foreach (var role in userRole.Roles)
+                            {
+                                <li>@role</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>No roles assigned</span>
+                    }
+                </td>
+                
+            </tr>
+        }
+    </tbody>
+</table>
+<td>
+    <a asp-action="AssignRole" class="btn btn-primary">Assign Role</a>
+</td>

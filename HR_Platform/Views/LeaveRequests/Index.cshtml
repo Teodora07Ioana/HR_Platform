@@ -1,0 +1,75 @@
+﻿@model IEnumerable<HR_Platform.Models.LeaveRequest>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Employee?.FullName</td>
+                <td>@item.StartDate.ToShortDateString()</td>
+                <td>@item.EndDate.ToShortDateString()</td>
+                <td>@item.Reason</td>
+                <td>@item.Status</td>
+                <td>
+                    @if (User.IsInRole("Manager") && item.Status == "Neaprobat")
+                    {
+                        <a asp-action="Approve" asp-route-id="@item.LeaveRequestID" class="btn btn-success">Approve</a>
+                        <a asp-action="Reject" asp-route-id="@item.LeaveRequestID" class="btn btn-danger">Reject</a>
+                    }
+                    else if (User.IsInRole("User") && item.Status == "Neaprobat")
+                    {
+                      
+                        <a asp-action="Delete" asp-route-id="@item.LeaveRequestID" class="btn btn-danger">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<!-- Container pentru notificări -->
+<div id="notificationContainer" style="position: fixed; top: 10px; right: 10px; z-index: 9999; max-width: 300px;">
+</div>
+
+<!-- Stiluri pentru notificări -->
+<style>
+    .notification {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+    }
+
+        .notification.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .notification.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+</style>

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<HR_Platform.Models.Attendance>
+
+<h2>Manage Attendances</h2>
+
+@if (!Model.Any())
+{
+    <p>Nu există pontaje disponibile.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Angajat</th>
+                <th>Email</th>
+                <th>Data</th>
+                <th>Ora de Check-In</th>
+                <th>Ora de Check-Out</th>
+                <th>Ore lucrate</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var attendance in Model)
+            {
+                <tr>
+                    <td>@attendance.Employee?.FullName</td>
+                    <td>@attendance.Employee?.Email</td>
+                    <td>@attendance.Date.ToShortDateString()</td>
+                    <td>@attendance.CheckInTime?.ToString("HH:mm")</td>
+                    <td>@attendance.CheckOutTime?.ToString("HH:mm")</td>
+                    <td>@attendance.HoursWorked</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
